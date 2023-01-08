@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build:ui": "rm -rf build && cd ../phonebook-frontend/ && npm run build && cp -r build ../phonebook-backend/build",
+    "start": "node index.js",
     "dev": "nodemon index.js",
     "deploy": "npm run build:ui && git add . && git commit -m uibuild && git push"
   },
@@ -13,7 +14,9 @@
   "dependencies": {
     "@vercel/node": "^2.8.4",
     "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
     "express": "^4.17.2",
+    "mongoose": "^6.8.3",
     "morgan": "^1.10.0"
   }
 }
