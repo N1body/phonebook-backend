@@ -6,14 +6,23 @@ const app = express()
 const path = require('path')
 // 导入数据库中的persons集合
 const Person = require('./modules/persons')
+// 跨域模块
+const cors = require('cors')
 
-app.use(express.static(path.join(__dirname, 'build')))
+// 自定义中间件
+const requestLogger = (request, response, next) => {
+  console.log('Method:', request.method)
+  console.log('Path:  ', request.path)
+  console.log('Body:  ', request.body)
+  console.log('---')
+  next()
+}
 
 // 中间件
 app.use(express.json())
-
-const cors = require('cors')
 app.use(cors())
+app.use(express.static(path.join(__dirname, 'build')))
+app.use(requestLogger)
 
 // 返回Info信息页面
 app.get('/info', (req, res) => {
@@ -50,25 +59,45 @@ app.get('/api/persons', (req, res) => {
 })
 
 // 获取单个人员
-app.get('/api/persons/:id', (req, res) => {
+app.get('/api/persons/:id', (req, res, next) => {
   const id = req.params.id
-  Person.findById(id).then(person => {
-    res.json(person)
-  })
+  Person.findById(id)
+    .then(person => {
+      if (person) {
+        res.json(person)
+      } else {
+        res.status(404).end()
+      }
+    })
+    .catch(err => next(err))
 })
 
 // 删除单个
-app.delete('/api/persons/:id', (req, res) => {
+app.delete('/api/persons/:id', (req, res, next) => {
   const id = req.params.id
-  Person.findByIdAndDelete(id).then(person => {
-    res.status(204).end()
-  })
+  Person.findByIdAndRemove(id)
+    .then(person => {
+      res.status(204).end()
+    })
+    .catch(err => next(err))
 })
 
 const unknownEndpoint = (req, res) => {
   res.status(404).send({ error: 'inknown endpoint' })
 }
 app.use(unknownEndpoint)
+
+// 错误处理
+const errorHandler = (err, req, res, next) => {
+  console.log(err.message)
+  
+  if (err.name === 'CastError') {
+    return res.status(400).send({ error: 'malformatted id' })
+  }
+
+  next(error)
+}
+app.use(errorHandler)
 
 // 服务器端口
 const PORT = process.env.PORT
