@@ -3,7 +3,7 @@ const express = require('express')
 // 创建express实例
 const app = express()
 const path = require('path')
-app.use(express.static(path.join(__dirname, 'public')))
+app.use(express.static(path.join(__dirname, 'build')))
 
 // 中间件
 app.use(express.json())
@@ -84,7 +84,7 @@ const unknownEndpoint = (req, res) => {
 app.use(unknownEndpoint)
 
 // 服务器端口
-const PORT = 3002
+const PORT = 3001
 // 监听端口
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}\nAddress: http://localhost:${PORT}`)
